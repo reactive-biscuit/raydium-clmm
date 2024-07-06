@@ -170,7 +170,8 @@ pub fn path_is_exist(path: &str) -> bool {
 
 pub async fn load_cur_and_next_five_tick_array(
     rpc_client: &RpcClient,
-    pool_config: &ClientConfig,
+    pool_id: &Pubkey,
+    raydium_amm_v3_program: &Pubkey,
     pool_state: &PoolState,
     tickarray_bitmap_extension: &TickArrayBitmapExtension,
     zero_for_one: bool,
@@ -183,10 +184,10 @@ pub async fn load_cur_and_next_five_tick_array(
         Pubkey::find_program_address(
             &[
                 raydium_amm_v3::states::TICK_ARRAY_SEED.as_bytes(),
-                pool_config.pool_id_account.unwrap().to_bytes().as_ref(),
+                pool_id.to_bytes().as_ref(),
                 &current_vaild_tick_array_start_index.to_be_bytes(),
             ],
-            &pool_config.raydium_v3_program,
+            &raydium_amm_v3_program,
         )
         .0,
     );
@@ -207,10 +208,10 @@ pub async fn load_cur_and_next_five_tick_array(
             Pubkey::find_program_address(
                 &[
                     raydium_amm_v3::states::TICK_ARRAY_SEED.as_bytes(),
-                    pool_config.pool_id_account.unwrap().to_bytes().as_ref(),
+                    pool_id.to_bytes().as_ref(),
                     &current_vaild_tick_array_start_index.to_be_bytes(),
                 ],
-                &pool_config.raydium_v3_program,
+                &raydium_amm_v3_program,
             )
             .0,
         );

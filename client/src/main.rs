@@ -1334,7 +1334,8 @@ async fn main() -> Result<()> {
             // load tick_arrays
             let mut tick_arrays = load_cur_and_next_five_tick_array(
                 &rpc_client,
-                &pool_config,
+                &pool_config.pool_id_account.unwrap(),
+                &pool_config.raydium_v3_program,
                 &pool_state,
                 &tickarray_bitmap_extension,
                 zero_for_one,
@@ -1516,7 +1517,8 @@ async fn main() -> Result<()> {
             // load tick_arrays
             let mut tick_arrays = load_cur_and_next_five_tick_array(
                 &rpc_client,
-                &pool_config,
+                &pool_config.pool_id_account.unwrap(),
+                &pool_config.raydium_v3_program,
                 &pool_state,
                 &tickarray_bitmap_extension,
                 zero_for_one,
