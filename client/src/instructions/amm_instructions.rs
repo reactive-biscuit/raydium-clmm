@@ -13,7 +13,7 @@ use raydium_amm_v3::states::{
 };
 use std::rc::Rc;
 
-use super::super::{read_keypair_file, ClientConfig};
+use crate::utils::{read_keypair_file, ClientConfig};
 
 pub fn create_amm_config_instr(
     config: &ClientConfig,

@@ -1,4 +1,4 @@
-use super::super::{read_keypair_file, ClientConfig};
+use crate::utils::{read_keypair_file, ClientConfig};
 use anchor_client::{Client, Cluster};
 use anyhow::Result;
 use solana_client::rpc_client::RpcClient;

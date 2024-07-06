@@ -9,7 +9,7 @@ use solana_account_decoder::UiAccountEncoding;
 use solana_client::{
     rpc_client::RpcClient,
     rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig, RpcTransactionConfig},
-    rpc_filter::{Memcmp, RpcFilterType}
+    rpc_filter::{Memcmp, RpcFilterType},
 };
 use solana_sdk::{
     commitment_config::CommitmentConfig,
@@ -31,7 +31,6 @@ use instructions::amm_instructions::*;
 use instructions::events_instructions_parse::*;
 use instructions::rpc::*;
 use instructions::token_instructions::*;
-use instructions::utils::*;
 use raydium_amm_v3::libraries::{fixed_point_64, liquidity_math, tick_math};
 use spl_associated_token_account::get_associated_token_address;
 use spl_token_2022::{
@@ -41,8 +40,7 @@ use spl_token_2022::{
 };
 use spl_token_client::token::ExtensionInitializationParams;
 
-use client::*;
-use crate::instructions::utils;
+use client::utils::{self, *};
 
 #[derive(Debug, Parser)]
 pub struct Opts {
