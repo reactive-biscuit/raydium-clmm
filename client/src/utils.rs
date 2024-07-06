@@ -8,7 +8,7 @@ use solana_account_decoder::{
     parse_token::{TokenAccountType, UiAccountState},
     UiAccountData,
 };
-use solana_client::rpc_client::RpcClient;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_client::rpc_request::TokenAccountsFilter;
 use solana_sdk::{account::Account, pubkey::Pubkey, signature::Keypair};
 use spl_token_2022::{
@@ -168,7 +168,7 @@ pub fn path_is_exist(path: &str) -> bool {
     Path::new(path).exists()
 }
 
-pub fn load_cur_and_next_five_tick_array(
+pub async fn load_cur_and_next_five_tick_array(
     rpc_client: &RpcClient,
     pool_config: &ClientConfig,
     pool_state: &PoolState,
@@ -216,7 +216,10 @@ pub fn load_cur_and_next_five_tick_array(
         );
         max_array_size -= 1;
     }
-    let tick_array_rsps = rpc_client.get_multiple_accounts(&tick_array_keys).unwrap();
+    let tick_array_rsps = rpc_client
+        .get_multiple_accounts(&tick_array_keys)
+        .await
+        .unwrap();
     let mut tick_arrays = VecDeque::new();
     for tick_array in tick_array_rsps {
         let tick_array_state =
@@ -237,13 +240,14 @@ pub struct TokenInfo {
     decimals: u8,
 }
 
-pub fn get_nft_account_and_position_by_owner(
+pub async fn get_nft_account_and_position_by_owner(
     client: &RpcClient,
     owner: &Pubkey,
     raydium_amm_v3_program: &Pubkey,
 ) -> (Vec<TokenInfo>, Vec<Pubkey>) {
     let all_tokens = client
         .get_token_accounts_by_owner(owner, TokenAccountsFilter::ProgramId(spl_token::id()))
+        .await
         .unwrap();
     let mut nft_account = Vec::new();
     let mut user_position_account = Vec::new();
@@ -334,7 +338,7 @@ pub fn amount_with_slippage(amount: u64, slippage: f64, round_up: bool) -> u64 {
     }
 }
 
-pub fn get_pool_mints_inverse_fee(
+pub async fn get_pool_mints_inverse_fee(
     rpc_client: &RpcClient,
     token_mint_0: Pubkey,
     token_mint_1: Pubkey,
@@ -342,8 +346,11 @@ pub fn get_pool_mints_inverse_fee(
     post_fee_amount_1: u64,
 ) -> (TransferFeeInfo, TransferFeeInfo) {
     let load_accounts = vec![token_mint_0, token_mint_1];
-    let rsps = rpc_client.get_multiple_accounts(&load_accounts).unwrap();
-    let epoch = rpc_client.get_epoch_info().unwrap().epoch;
+    let rsps = rpc_client
+        .get_multiple_accounts(&load_accounts)
+        .await
+        .unwrap();
+    let epoch = rpc_client.get_epoch_info().await.unwrap().epoch;
     let mut mint0_account = rsps[0].clone().ok_or("load mint0 rps error!").unwrap();
     let mut mint1_account = rsps[1].clone().ok_or("load mint0 rps error!").unwrap();
     let mint0_state = StateWithExtensionsMut::<Mint>::unpack(&mut mint0_account.data).unwrap();
@@ -362,7 +369,7 @@ pub fn get_pool_mints_inverse_fee(
     )
 }
 
-pub fn get_pool_mints_transfer_fee(
+pub async fn get_pool_mints_transfer_fee(
     rpc_client: &RpcClient,
     token_mint_0: Pubkey,
     token_mint_1: Pubkey,
@@ -370,8 +377,11 @@ pub fn get_pool_mints_transfer_fee(
     pre_fee_amount_1: u64,
 ) -> (TransferFeeInfo, TransferFeeInfo) {
     let load_accounts = vec![token_mint_0, token_mint_1];
-    let rsps = rpc_client.get_multiple_accounts(&load_accounts).unwrap();
-    let epoch = rpc_client.get_epoch_info().unwrap().epoch;
+    let rsps = rpc_client
+        .get_multiple_accounts(&load_accounts)
+        .await
+        .unwrap();
+    let epoch = rpc_client.get_epoch_info().await.unwrap().epoch;
     let mut mint0_account = rsps[0].clone().ok_or("load mint0 rps error!").unwrap();
     let mut mint1_account = rsps[1].clone().ok_or("load mint0 rps error!").unwrap();
     let mint0_state = StateWithExtensionsMut::<Mint>::unpack(&mut mint0_account.data).unwrap();
