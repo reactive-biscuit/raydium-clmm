@@ -1,7 +1,6 @@
 use anchor_client::{Client, Cluster};
 use anchor_lang::prelude::AccountMeta;
 use anyhow::Result;
-use mpl_token_metadata::state::PREFIX as MPL_PREFIX;
 use solana_sdk::{
     instruction::Instruction, pubkey::Pubkey, signature::Signer, system_program, sysvar,
 };
@@ -15,6 +14,7 @@ use std::rc::Rc;
 
 use crate::utils::{read_keypair_file, ClientConfig};
 
+const MPL_PREFIX: &str = "metadata";
 pub fn create_amm_config_instr(
     config: &ClientConfig,
     config_index: u16,
@@ -217,10 +217,10 @@ pub fn open_position_instr(
     let (metadata_account_key, _bump) = Pubkey::find_program_address(
         &[
             MPL_PREFIX.as_bytes(),
-            mpl_token_metadata::id().to_bytes().as_ref(),
+            mpl_token_metadata::ID.to_bytes().as_ref(),
             nft_mint_key.to_bytes().as_ref(),
         ],
-        &mpl_token_metadata::id(),
+        &mpl_token_metadata::ID,
     );
     let (protocol_position_key, __bump) = Pubkey::find_program_address(
         &[
@@ -272,7 +272,7 @@ pub fn open_position_instr(
             system_program: system_program::id(),
             token_program: spl_token::id(),
             associated_token_program: spl_associated_token_account::id(),
-            metadata_program: mpl_token_metadata::id(),
+            metadata_program: mpl_token_metadata::ID,
             token_program_2022: spl_token_2022::id(),
             vault_0_mint: token_mint_0,
             vault_1_mint: token_mint_1,

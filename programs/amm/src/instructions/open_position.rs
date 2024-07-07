@@ -10,7 +10,7 @@ use anchor_spl::metadata::Metadata;
 use anchor_spl::token::{self, Token};
 use anchor_spl::token_2022::{self, spl_token_2022::instruction::AuthorityType};
 use anchor_spl::token_interface::{Mint, Token2022, TokenAccount};
-use mpl_token_metadata::{instruction::create_metadata_accounts_v3, state::Creator};
+use mpl_token_metadata::types::{Creator, DataV2};
 use std::cell::RefMut;
 #[cfg(feature = "enable-log")]
 use std::convert::identity;
@@ -929,7 +929,7 @@ fn create_nft_with_metadata<'info>(
     position_nft_mint: &Box<InterfaceAccount<'info, Mint>>,
     position_nft_account: &Box<InterfaceAccount<'info, TokenAccount>>,
     metadata_account: &UncheckedAccount<'info>,
-    metadata_program: &Program<'info, Metadata>,
+    _metadata_program: &Program<'info, Metadata>,
     token_program: &Program<'info, Token>,
     system_program: &Program<'info, System>,
     rent: &Sysvar<'info, Rent>,
@@ -951,28 +951,38 @@ fn create_nft_with_metadata<'info>(
         1,
     )?;
     if with_matedata {
-        let create_metadata_ix = create_metadata_accounts_v3(
-            metadata_program.key(),
-            metadata_account.key(),
-            position_nft_mint.key(),
-            pool_state_loader.key(),
-            payer.key(),
-            pool_state_loader.key(),
-            String::from("Raydium Concentrated Liquidity"),
-            String::from("RCL"),
-            METADATA_URI.to_string(),
-            Some(vec![Creator {
-                address: pool_state_loader.key(),
-                verified: true,
-                share: 100,
-            }]),
-            0,
-            true,
-            false,
-            None,
-            None,
-            None,
+        let create_metadata_ix = mpl_token_metadata::instructions::CreateMetadataAccountV3 {
+            metadata: metadata_account.key(),
+            mint: position_nft_mint.key(),
+            mint_authority: pool_state_loader.key(),
+            payer: payer.key(),
+            rent: None,
+            system_program: anchor_lang::solana_program::system_program::ID,
+            update_authority: (
+                pool_state_loader.key(),
+                true,
+            ),
+        }
+        .instruction(
+            mpl_token_metadata::instructions::CreateMetadataAccountV3InstructionArgs {
+                collection_details: None,
+                data: DataV2 {
+                    name: String::from("Raydium Concentrated Liquidity"),
+                    symbol: String::from("RCL"),
+                    uri: METADATA_URI.to_string(),
+                    seller_fee_basis_points: 0,
+                    creators: Some(vec![Creator {
+                        address: pool_state_loader.key(),
+                        verified: true,
+                        share: 100,
+                    }]),
+                    collection: None,
+                    uses: None
+                },
+                is_mutable: false,
+            },
         );
+
         solana_program::program::invoke_signed(
             &create_metadata_ix,
             &[
